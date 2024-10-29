@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <style>
+        body{
+            margin: 0;
+            padding: 0;
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        }
+        iframe{
+            height: 100vh;
+            width: 70vw;
+            border: none
+        }
+        #buttons-Container{
+            width: 30vw;
+            overflow: scroll;
+            height: 100dvh;
+        }
+        .selectedBorder{
+            background-color: rgb(255, 89, 89) !important;
+        }
+        .optionsbutton:hover{
+            cursor: pointer;
+            background-color: rgb(57, 57, 154);
+
+            transition-duration: 150;
+        }
+        .optionsbutton{
+            background-color: rgb(95, 95, 255);
+            border-color: rgb(95, 95, 255);
+            color: white;
+            padding: 0.5rem 1rem;
+            /* border: none; */
+            border-radius: 5px;
+            margin: 4px;
+            font-weight: 600;
+            box-shadow: 0px 0px 5px 2px rgba(128, 128, 128, 0.466);
+        }
+        .parentContainer{
+            display: flex;
+            align-items: center;
+        }
+        .parentContainer>div{
+            display: flex;
+            flex-direction: column;
+        }
+        .parentContainer>div>div{
+            flex-wrap: wrap;
+            gap: 4px;
+            display: flex;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="parentContainer">
+    
+        <!-- <iframe id="myIframe" src="http://localhost:5173/product?id=1e55ac44-123f-444c-b8fd-5aea4e463c40"></iframe> -->
+        <iframe id="myIframe" src="http://localhost:5173/product?id=743b5439-9f7a-4426-8d96-3a361a1e9ea3"></iframe>
+        <div id="buttons-Container"></div>
+    
+    </div>
+    
+    <script>
+        const iframe = document.getElementById("myIframe");
+
+        // Send a message to the iframe
+        function sendMessageToIframe() {
+            const message = { type: "greeting", text: "Hello from Parent!" };
+            iframe.contentWindow.postMessage(message, "*");
+        }
+
+        var ButtonsData = [];
+        window.addEventListener("message", (event) => {
+            if(event?.data?.source?.startsWith('react-devtools')) return
+            const cont = document.getElementById("buttons-Container")
+
+            if(ButtonsData.length!==0 && event.data.length){
+                cont.innerHTML=""
+                event.data.map(catagories => {
+                    const categoryDiv = document.createElement('div')
+                    Object.entries(catagories).forEach(([key,value],index)=>{
+                        const [category,option,mat] = key.split(":")
+                        if(mat=="group"){
+                            const newDiv = document.createElement("div")
+                            // debugger
+                            Object.entries(value).map(([gKey,gValue],gIndex)=>{
+                                const btn = document.createElement('button')
+                                btn.addEventListener('click',()=>{
+                                    console.log("Sending-->",gValue)
+                                    iframe.contentWindow.postMessage(gValue,"*")
+                                })
+                                btn.classList.add("optionsbutton");
+                                gValue.selected && btn.classList.add("selectedBorder");
+                                btn.innerHTML = gKey
+                                newDiv.append(btn)
+                            })
+                            const subHeading = document.createElement("h3")
+                            subHeading.innerText = "->"+option
+                            categoryDiv.appendChild(subHeading)
+                            categoryDiv.appendChild(newDiv)
+
+                        }else{
+                            // these are model buttons:
+                            const btn = document.createElement('button')
+                            btn.addEventListener('click',()=>{
+                                console.log("Sending-->",value)
+                                iframe.contentWindow.postMessage(value,"*")
+                            })
+                            console.log(value.selected)
+                            btn.classList.add("optionsbutton");
+                            value.selected && btn.classList.add("selectedBorder");
+                            btn.innerHTML = option
+                            categoryDiv.appendChild(btn)
+
+                        }
+
+
+                    })
+                    const headingElement = document.createElement('h2')
+                    headingElement.innerHTML= (Object.keys(catagories) + "").split(":")[0]
+                    // cont.innerHTML += `<h1>HEELO</h1>`
+                    cont.appendChild(headingElement)
+                    cont.appendChild(categoryDiv)
+
+                })
+            }
+            ButtonsData = event.data
+            
+
+        });
+    </script>
+</body>
+</html>
