@@ -1,0 +1,121 @@
+
+body{
+    margin: 0;
+    padding: 0;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    background-color: #e6da7d;
+}
+.mainWrapperClass{
+    box-shadow: 0 0 20px 0 #0505058c;
+    width: 75%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+iframe{
+    height: 74.5%;
+    width: 100%;
+    border: none;
+}
+.parentContainer{
+    width: 100%;
+    height: 75dvh;
+    display: flex;
+    align-items: stretch;
+    background-color:white;
+}
+#buttons-Container{
+    width: 100%;
+    height: 100%;
+    padding: 1rem;
+    box-sizing: border-box;
+}
+
+.CategoryDivForMaterial .selectedBorder{
+    border: solid 2px yellow;
+}
+
+.optionsbutton:hover{
+    cursor: pointer;
+    border: solid 2px;
+    border-color: black;
+    transition-duration: 150;
+}
+.optionsbutton{
+    position: relative;
+    padding: 0px;
+    border: 2px solid transparent;
+    margin: 0.25rem;
+    aspect-ratio: 1;
+    font-weight: 600;
+    display: flex;
+}
+
+
+.optionsbuttonModel{
+    display: flex;
+    align-items: center;
+    border: none;
+    background-color: transparent;
+}
+.optionsbuttonModelText{
+
+}
+.CategoryDivForMaterial{
+    border: solid transparent 1px;
+    display: flex;
+    flex-wrap: wrap;
+}
+.CategoryDivForModels{
+    display: flex;
+}
+
+.bottomSection{
+    height: 25%;
+    overflow-y: scroll;
+}
+
+
+#bottom_material_selection_pannel{
+    display: flex;
+    flex-wrap: wrap;
+    padding: 2rem;
+}
+
+
+.buttonText{
+    position: absolute;
+    z-index:1;
+    font-size: 0.65rem;
+    color: white;
+    left: 10px;
+    bottom: 10px;
+}
+.buttonIconImage{
+    height: 5rem;
+    aspect-ratio: 1;
+}
+
+.leftSection{
+    width: 60%;
+}
+
+.rightSection{
+    width: 40%;
+    background-color: lightgray;
+}
+.topPsudoModelsClass{
+    display: flex;
+    align-items: center;
+}
+
+.placerImages{
+    width: 100%;
+}
+
+.readOnlyCheckboxInput{
+    background-color: gray;
+    border:none
+}

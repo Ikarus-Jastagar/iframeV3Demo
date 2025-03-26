@@ -3,67 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-
-    <style>
-        body{
-            margin: 0;
-            padding: 0;
-            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-        }
-        iframe{
-            height: 100vh;
-            width: 70vw;
-            border: none
-        }
-        #buttons-Container{
-            width: 30vw;
-            overflow: scroll;
-            height: 100dvh;
-        }
-        .selectedBorder{
-            background-color: rgb(255, 89, 89) !important;
-        }
-        .optionsbutton:hover{
-            cursor: pointer;
-            background-color: rgb(57, 57, 154);
-
-            transition-duration: 150;
-        }
-        .optionsbutton{
-            background-color: rgb(95, 95, 255);
-            border-color: rgb(95, 95, 255);
-            color: white;
-            padding: 0.5rem 1rem;
-            /* border: none; */
-            border-radius: 5px;
-            margin: 4px;
-            font-weight: 600;
-            box-shadow: 0px 0px 5px 2px rgba(128, 128, 128, 0.466);
-        }
-        .parentContainer{
-            display: flex;
-            align-items: center;
-        }
-        .parentContainer>div{
-            display: flex;
-            flex-direction: column;
-        }
-        .parentContainer>div>div{
-            flex-wrap: wrap;
-            gap: 4px;
-            display: flex;
-            align-items: center;
-        }
-    </style>
+    <title>DVC</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="parentContainer">
+    <div class="mainWrapperClass">
+        <img class="placerImages" src="assets/DVC1.png" alt="upper image"/>
+        <div class="parentContainer">
+            <div class="leftSection">
+                <iframe id="myIframe" src="https://viewer.ikarusdelta.com/product?id=356b8308-39d2-4766-88f2-e4c76870e6c9"></iframe>
+                <div class="bottomSection">
+                    <div id="bottom_material_selection_pannel"></div>
+                </div>
+            </div>
     
-        <!-- <iframe id="myIframe" src="http://localhost:5173/product?id=1e55ac44-123f-444c-b8fd-5aea4e463c40"></iframe> -->
-        <iframe id="myIframe" src="http://localhost:5173/product?id=743b5439-9f7a-4426-8d96-3a361a1e9ea3"></iframe>
-        <div id="buttons-Container"></div>
+            <div class="rightSection">
     
+                <div id="CategoryActiveButtons"></div>
+                <div id="buttons-Container">
+                    <div id="primeCatsOptions"></div>
+                </div>
+            </div>
+        </div>
+        <img class="placerImages" src="assets/DVC2.png" alt="bottom image"/>
     </div>
     
     <script>
@@ -75,64 +37,200 @@
             iframe.contentWindow.postMessage(message, "*");
         }
 
+
+        function dataModifier(item){
+            return Object.entries(item).reduce((ans,[key,value])=>{
+                const [a,b,c] = key.split(":")
+                if(a && b && c){
+                    return ans[a]={
+                        ...ans,
+                        [a]:{
+                            ...ans[a],
+                            [b]:{
+                                icon:Object.values(value)[0]?.buttonIcon,
+                                mats:value
+                            }
+                        }
+                    }
+                }
+                return ans
+            },{})
+        }
+        
         var ButtonsData = [];
+        let firstRender = false
+
+        var activePrimeCategory = ""
+        var activeSubCategory = ""
+        var activeMat = ""
+
+        function rerenderMatsInSubCat(mats){
+            const pannel = document.getElementById("bottom_material_selection_pannel")
+            pannel.innerHTML = ""
+
+            Object.entries(mats).forEach(([gKey,gValue]) => {
+
+                if(!activeMat){activeMat=[gKey,gValue]}
+
+                const btn = document.createElement('button')
+                btn.addEventListener('click',()=>{
+                    activeMat = [gKey,gValue]
+                    iframe.contentWindow.postMessage(gValue,"*")
+                })
+
+                const image = document.createElement("img")
+                const text = document.createElement("div")
+                text.innerHTML = gKey
+                image.src = gValue.buttonIcon || ""
+                image.alt = "BaseMap "+gKey
+                
+                btn.classList.add("optionsbutton");
+                text.classList.add("buttonText")
+                image.classList.add("buttonIconImage")
+                
+                btn.append(image)
+                btn.append(text)
+                pannel.append(btn)
+
+                if(activeMat[1]?.selected){
+                    console.log("AddingClass")
+                    btn.classList.add("selectedBorder")
+                }
+            })
+        }
+        
+        function rerenderActivePrimeCat(cat){
+            const prime = document.createElement("div")
+            prime.id = "material_icons_div"
+            prime.classList.add("CategoryDivForMaterial")
+            // console.log("Active=>",cat)
+            Object.entries(cat).forEach(([subCat,value])=>{
+                
+                if(!activeSubCategory){
+                    activeSubCategory=[subCat,value]
+                }
+                const btn = document.createElement('button')
+                btn.addEventListener('click',()=>{
+                    
+                    console.log("SUBACTIVATING",value)
+                    activeSubCategory=[subCat,value]
+                    document.querySelectorAll(".optionsbutton").forEach(e=>e.classList.remove("selectedBorder"))
+                    btn.classList.add("selectedBorder");
+                    value.mats && rerenderMatsInSubCat(value.mats)
+                
+                })
+
+                if(subCat == activeSubCategory[0]){
+                    btn.classList.add("selectedBorder");
+                }
+
+                const image = document.createElement("img")
+                const text = document.createElement("div")
+                text.innerHTML = subCat
+                image.src = value.icon || ""
+                image.alt = "BaseMap "+subCat
+                
+                btn.classList.add("optionsbutton");
+                text.classList.add("buttonText")
+                image.classList.add("buttonIconImage")
+                
+                btn.append(image)
+                btn.append(text)
+                prime.append(btn)
+
+                if(activeSubCategory){
+                    rerenderMatsInSubCat(activeSubCategory[1].mats)
+                }
+
+            })
+            return prime
+        }
+
         window.addEventListener("message", (event) => {
-            if(event?.data?.source?.startsWith('react-devtools')) return
+            if(event?.data?.source?.startsWith('react-devtools')) return;
             const cont = document.getElementById("buttons-Container")
+            const categoryActiveButtons = document.getElementById("CategoryActiveButtons")
 
             if(ButtonsData.length!==0 && event.data.length){
+                
+                
+                const modifiedMaterialsData = []
+                const modelsData = []
+                event.data?.forEach((menuItem) => {
+
+                    const menuEntries = Object.keys(menuItem)
+                    const subCats = menuEntries?.[0].split(":")
+                    const isMaterial = subCats.length==3
+                    const materials = []
+                    if(isMaterial){
+                        modifiedMaterialsData.push(dataModifier(menuItem))
+                    }else{
+                        modelsData.push(menuItem)
+                    }
+                
+                },{})
+                
+                console.log("Data=>",modifiedMaterialsData,modelsData)
+                
+                
                 cont.innerHTML=""
-                event.data.map(catagories => {
-                    const categoryDiv = document.createElement('div')
-                    Object.entries(catagories).forEach(([key,value],index)=>{
-                        const [category,option,mat] = key.split(":")
-                        if(mat=="group"){
-                            const newDiv = document.createElement("div")
-                            // debugger
-                            Object.entries(value).map(([gKey,gValue],gIndex)=>{
-                                const btn = document.createElement('button')
-                                btn.addEventListener('click',()=>{
-                                    console.log("Sending-->",gValue)
-                                    iframe.contentWindow.postMessage(gValue,"*")
-                                })
-                                btn.classList.add("optionsbutton");
-                                gValue.selected && btn.classList.add("selectedBorder");
-                                btn.innerHTML = gKey
-                                newDiv.append(btn)
-                            })
-                            const subHeading = document.createElement("h3")
-                            subHeading.innerText = "->"+option
-                            categoryDiv.appendChild(subHeading)
-                            categoryDiv.appendChild(newDiv)
+                categoryActiveButtons.innerHTML=""
+                // console.log(event.data)
 
-                        }else{
-                            // these are model buttons:
-                            const btn = document.createElement('button')
-                            btn.addEventListener('click',()=>{
-                                console.log("Sending-->",value)
-                                iframe.contentWindow.postMessage(value,"*")
-                            })
-                            console.log(value.selected)
-                            btn.classList.add("optionsbutton");
-                            value.selected && btn.classList.add("selectedBorder");
-                            btn.innerHTML = option
-                            categoryDiv.appendChild(btn)
+                const categoryDiv = document.createElement('div')
+                categoryDiv.classList.add("topPsudoModelsClass")
 
+                modifiedMaterialsData.forEach(e => {
+                    Object.entries(e).forEach(([primeCat,value])=>{
+                        const primaryBtn = document.createElement("button")
+                        primaryBtn.innerHTML = primeCat
+                    
+                        const btn = document.createElement('button')
+                        const checkbox = document.createElement("input")
+                        const text = document.createElement("div")
+
+                        checkbox.type="checkbox";
+                        checkbox.classList.add("readOnlyCheckboxInput");
+                        checkbox.readOnly = true;
+                        checkbox.checked = value.selected;
+
+                        text.innerHTML = primeCat;
+
+                        if(!activePrimeCategory){activePrimeCategory = [primeCat,value]}
+
+                        text.classList.add("optionsbuttonModelText");
+                        btn.classList.add("optionsbuttonModel");
+                        value.selected && btn.classList.add("selectedBorder");
+
+                        
+                        
+                        btn.appendChild(checkbox)
+                        btn.appendChild(text)
+                        categoryDiv.appendChild(btn)
+                        
+                        btn.addEventListener('click',()=>{
+                            console.log("activating",value)
+                            activePrimeCategory = [primeCat,value]
+                            document.querySelectorAll(".readOnlyCheckboxInput").forEach(e=>e.checked=false)
+                            checkbox.checked=true
+                            const preExisting = document.getElementById("material_icons_div")
+                            // for first render
+                            if(preExisting){cont.removeChild(preExisting)}
+                            cont.appendChild(rerenderActivePrimeCat(value))
+                        })
+                        
+                        if(primeCat==activePrimeCategory[0]){
+                            checkbox.checked=true
                         }
-
-
                     })
-                    const headingElement = document.createElement('h2')
-                    headingElement.innerHTML= (Object.keys(catagories) + "").split(":")[0]
-                    // cont.innerHTML += `<h1>HEELO</h1>`
-                    cont.appendChild(headingElement)
-                    cont.appendChild(categoryDiv)
 
                 })
+                cont.appendChild(categoryDiv)
+                if(activePrimeCategory){
+                    cont.appendChild(rerenderActivePrimeCat(activePrimeCategory[1]))
+                }
             }
             ButtonsData = event.data
-            
-
         });
     </script>
 </body>
