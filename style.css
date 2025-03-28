@@ -69,7 +69,25 @@ iframe{
     font-weight: 600;
     display: flex;
     width: 30%;
+    aspect-ratio: 4 / 3;
+
 }
+.buttonText{
+    position: absolute;
+    z-index:1;
+    font-size: 0.65rem;
+    color: white;
+    left: 0.25rem;
+    bottom: 0.25rem;
+}
+.buttonIconImage{
+    width: 100%;
+    object-fit: cover;
+    aspect-ratio: 1;
+}
+
+
+
 .optionsbuttonSubCats{
     position: relative;
     padding: 0px;
@@ -139,19 +157,6 @@ iframe{
     padding: 0 2rem;
 }
 
-
-.buttonText{
-    position: absolute;
-    z-index:1;
-    font-size: 0.65rem;
-    color: white;
-    left: 0.25rem;
-    bottom: 0.25rem;
-}
-.buttonIconImage{
-    width: 100%;
-    aspect-ratio: 4 / 3;
-}
 .buttonIconImageSubCats{
     height: 80px;
     aspect-ratio: 1;
