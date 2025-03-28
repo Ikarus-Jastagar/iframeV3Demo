@@ -13,13 +13,18 @@
         <div class="parentContainer">
             <div class="leftSection">
                 <iframe id="myIframe" src="https://viewer.ikarusdelta.com/product?id=356b8308-39d2-4766-88f2-e4c76870e6c9"></iframe>
+                <div id="modelsButtonContainerDiv"></div>
                 <div class="bottomSection">
                     <div id="bottom_material_selection_pannel"></div>
                 </div>
             </div>
     
             <div class="rightSection">
-    
+                <div id="productDetails">
+                    <div class="product-name">
+                        Contexture Fabric
+                    </div>
+                </div>
                 <div id="CategoryActiveButtons"></div>
                 <div id="buttons-Container">
                     <div id="primeCatsOptions"></div>
@@ -29,210 +34,6 @@
         <img class="placerImages" src="assets/DVC2.png" alt="bottom image"/>
     </div>
     
-    <script>
-        const iframe = document.getElementById("myIframe");
-
-        // Send a message to the iframe
-        function sendMessageToIframe() {
-            const message = { type: "greeting", text: "Hello from Parent!" };
-            iframe.contentWindow.postMessage(message, "*");
-        }
-
-
-        function dataModifier(item){
-            return Object.entries(item).reduce((ans,[key,value])=>{
-                const [a,b,c] = key.split(":")
-                if(a && b && c){
-                    return ans[a]={
-                        ...ans,
-                        [a]:{
-                            ...ans[a],
-                            [b]:{
-                                icon:Object.values(value)[0]?.buttonIcon,
-                                mats:value
-                            }
-                        }
-                    }
-                }
-                return ans
-            },{})
-        }
-        
-        var ButtonsData = [];
-        let firstRender = false
-
-        var activePrimeCategory = ""
-        var activeSubCategory = ""
-        var activeMat = ""
-
-        function rerenderMatsInSubCat(mats){
-            const pannel = document.getElementById("bottom_material_selection_pannel")
-            pannel.innerHTML = ""
-
-            Object.entries(mats).forEach(([gKey,gValue]) => {
-
-                if(!activeMat){activeMat=[gKey,gValue]}
-
-                const btn = document.createElement('button')
-                btn.addEventListener('click',()=>{
-                    activeMat = [gKey,gValue]
-                    iframe.contentWindow.postMessage(gValue,"*")
-                })
-
-                const image = document.createElement("img")
-                const text = document.createElement("div")
-                text.innerHTML = gKey
-                image.src = gValue.buttonIcon || ""
-                image.alt = "BaseMap "+gKey
-                
-                btn.classList.add("optionsbutton");
-                text.classList.add("buttonText")
-                image.classList.add("buttonIconImage")
-                
-                btn.append(image)
-                btn.append(text)
-                pannel.append(btn)
-
-                if(activeMat[1]?.selected){
-                    console.log("AddingClass")
-                    btn.classList.add("selectedBorder")
-                }
-            })
-        }
-        
-        function rerenderActivePrimeCat(cat){
-            const prime = document.createElement("div")
-            prime.id = "material_icons_div"
-            prime.classList.add("CategoryDivForMaterial")
-            // console.log("Active=>",cat)
-            Object.entries(cat).forEach(([subCat,value])=>{
-                
-                if(!activeSubCategory){
-                    activeSubCategory=[subCat,value]
-                }
-                const btn = document.createElement('button')
-                btn.addEventListener('click',()=>{
-                    
-                    console.log("SUBACTIVATING",value)
-                    activeSubCategory=[subCat,value]
-                    document.querySelectorAll(".optionsbutton").forEach(e=>e.classList.remove("selectedBorder"))
-                    btn.classList.add("selectedBorder");
-                    value.mats && rerenderMatsInSubCat(value.mats)
-                
-                })
-
-                if(subCat == activeSubCategory[0]){
-                    btn.classList.add("selectedBorder");
-                }
-
-                const image = document.createElement("img")
-                const text = document.createElement("div")
-                text.innerHTML = subCat
-                image.src = value.icon || ""
-                image.alt = "BaseMap "+subCat
-                
-                btn.classList.add("optionsbutton");
-                text.classList.add("buttonText")
-                image.classList.add("buttonIconImage")
-                
-                btn.append(image)
-                btn.append(text)
-                prime.append(btn)
-
-                if(activeSubCategory){
-                    rerenderMatsInSubCat(activeSubCategory[1].mats)
-                }
-
-            })
-            return prime
-        }
-
-        window.addEventListener("message", (event) => {
-            if(event?.data?.source?.startsWith('react-devtools')) return;
-            const cont = document.getElementById("buttons-Container")
-            const categoryActiveButtons = document.getElementById("CategoryActiveButtons")
-
-            if(ButtonsData.length!==0 && event.data.length){
-                
-                
-                const modifiedMaterialsData = []
-                const modelsData = []
-                event.data?.forEach((menuItem) => {
-
-                    const menuEntries = Object.keys(menuItem)
-                    const subCats = menuEntries?.[0].split(":")
-                    const isMaterial = subCats.length==3
-                    const materials = []
-                    if(isMaterial){
-                        modifiedMaterialsData.push(dataModifier(menuItem))
-                    }else{
-                        modelsData.push(menuItem)
-                    }
-                
-                },{})
-                
-                console.log("Data=>",modifiedMaterialsData,modelsData)
-                
-                
-                cont.innerHTML=""
-                categoryActiveButtons.innerHTML=""
-                // console.log(event.data)
-
-                const categoryDiv = document.createElement('div')
-                categoryDiv.classList.add("topPsudoModelsClass")
-
-                modifiedMaterialsData.forEach(e => {
-                    Object.entries(e).forEach(([primeCat,value])=>{
-                        const primaryBtn = document.createElement("button")
-                        primaryBtn.innerHTML = primeCat
-                    
-                        const btn = document.createElement('button')
-                        const checkbox = document.createElement("input")
-                        const text = document.createElement("div")
-
-                        checkbox.type="checkbox";
-                        checkbox.classList.add("readOnlyCheckboxInput");
-                        checkbox.readOnly = true;
-                        checkbox.checked = value.selected;
-
-                        text.innerHTML = primeCat;
-
-                        if(!activePrimeCategory){activePrimeCategory = [primeCat,value]}
-
-                        text.classList.add("optionsbuttonModelText");
-                        btn.classList.add("optionsbuttonModel");
-                        value.selected && btn.classList.add("selectedBorder");
-
-                        
-                        
-                        btn.appendChild(checkbox)
-                        btn.appendChild(text)
-                        categoryDiv.appendChild(btn)
-                        
-                        btn.addEventListener('click',()=>{
-                            console.log("activating",value)
-                            activePrimeCategory = [primeCat,value]
-                            document.querySelectorAll(".readOnlyCheckboxInput").forEach(e=>e.checked=false)
-                            checkbox.checked=true
-                            const preExisting = document.getElementById("material_icons_div")
-                            // for first render
-                            if(preExisting){cont.removeChild(preExisting)}
-                            cont.appendChild(rerenderActivePrimeCat(value))
-                        })
-                        
-                        if(primeCat==activePrimeCategory[0]){
-                            checkbox.checked=true
-                        }
-                    })
-
-                })
-                cont.appendChild(categoryDiv)
-                if(activePrimeCategory){
-                    cont.appendChild(rerenderActivePrimeCat(activePrimeCategory[1]))
-                }
-            }
-            ButtonsData = event.data
-        });
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
