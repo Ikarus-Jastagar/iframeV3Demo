@@ -28,6 +28,7 @@ iframe{
     align-items: stretch;
     background-color:white;
     overflow: hidden;
+    position: relative;
 }
 #buttons-Container{
     width: 100%;
@@ -212,4 +213,20 @@ iframe{
 }
 .selectedModelClass{
     border: solid 2px yellow !important;
+}
+
+
+.ikarusDeltaLogoParent{
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+}
+.ikarusDeltaLogo{
+    height: 30px;
+    opacity: 30%;
+    transition-duration: 150ms;
+}
+.ikarusDeltaLogo:hover{
+    opacity: 100%;
+    cursor: pointer;
 }
