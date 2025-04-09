@@ -23,7 +23,7 @@ iframe{
 
 .parentContainer{
     width: 100%;
-    height: 95dvh;
+    height: 100dvh;
     display: flex;
     align-items: stretch;
     background-color:white;
