@@ -1,6 +1,23 @@
 
 const iframe = document.getElementById("myIframe");
 
+
+function mobileSideMenuBtn(materialClick=false){
+    const panel = document.getElementById('rightPanel');
+    if(materialClick){
+        panel.classList.remove('open');
+    }else{
+        panel.classList.toggle('open');
+    }
+    if(panel.classList.contains('open')){
+        document.getElementById('toggleButton').innerHTML = ">>"
+    }else{
+        document.getElementById('toggleButton').innerHTML = "<<"
+    }
+}
+
+document.getElementById('toggleButton').addEventListener('click', (e)=>mobileSideMenuBtn(false));
+
 // Send a message to the iframe
 function sendMessageToIframe() {
     const message = { type: "greeting", text: "Hello from Parent!" };
@@ -46,7 +63,8 @@ function rerenderMatsInSubCat(mats){
         const btn = document.createElement('button')
         btn.addEventListener('click',()=>{
             activeMat = [gKey,gValue]
-            iframe.contentWindow.postMessage(gValue,"*")
+            iframe.contentWindow.postMessage(gValue,"*");
+            mobileSideMenuBtn(true);
         })
 
         const image = document.createElement("img")
