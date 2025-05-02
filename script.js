@@ -10,9 +10,9 @@ function mobileSideMenuBtn(materialClick=false){
         panel.classList.toggle('open');
     }
     if(panel.classList.contains('open')){
-        document.getElementById('toggleButton').innerHTML = ">>"
+        document.getElementById('toggleButton').style.transform = "rotate(180deg)";
     }else{
-        document.getElementById('toggleButton').innerHTML = "<<"
+        document.getElementById('toggleButton').style.transform = "rotate(0deg)";
     }
 }
 
@@ -169,43 +169,61 @@ window.addEventListener("message", (event) => {
         const categoryDiv = document.createElement('div')
         categoryDiv.classList.add("topPsudoModelsClass")
 
+        const isMobile = window.innerWidth <= 768; // define mobile threshold
+        let mobileGroupDiv = null;
+        let mobileItemCounter = 0;
+
         modifiedMaterialsData.forEach(e => {
-            Object.entries(e).forEach(([primeCat,value])=>{
-                const primaryBtn = document.createElement("button")
-                primaryBtn.innerHTML = primeCat
-            
-                const btn = document.createElement('button')
-                const text = document.createElement("div")
-
+            Object.entries(e).forEach(([primeCat, value]) => {
+                const primaryBtn = document.createElement("button");
+                primaryBtn.innerHTML = primeCat;
+        
+                const btn = document.createElement('button');
+                const text = document.createElement("div");
                 text.innerHTML = primeCat;
-
-                if(!activePrimeCategory){activePrimeCategory = [primeCat,value]}
-
+        
+                if (!activePrimeCategory) {
+                    activePrimeCategory = [primeCat, value];
+                }
+        
                 text.classList.add("optionsbuttonModelText");
                 btn.classList.add("optionsbuttonModel");
                 value.selected && btn.classList.add("selectedBorder");
-
-                
-                btn.appendChild(text)
-                categoryDiv.appendChild(btn)
-                
-                btn.addEventListener('click',()=>{
-                    console.log("activating",value)
-                    activePrimeCategory = [primeCat,value]
-                    document.querySelectorAll(".readOnlyCheckbox").forEach( e=>e.classList.remove("readOnlyCheckbox"))
-                    btn.classList.add("readOnlyCheckbox")
-                    const preExisting = document.getElementById("material_icons_div")
-                    // for first render
-                    if(preExisting){cont.removeChild(preExisting)}
-                    cont.appendChild(rerenderActivePrimeCat(value))
-                })
-                
-                if(primeCat==activePrimeCategory[0]){
-                    btn.classList.add("readOnlyCheckbox")
+        
+                btn.appendChild(text);
+        
+                // mobile grouping logic
+                if (isMobile) {
+                    if (!mobileGroupDiv || mobileItemCounter % 2 === 0) {
+                        mobileGroupDiv = document.createElement("div");
+                        mobileGroupDiv.style.display = "flex";
+                        mobileGroupDiv.style.flexDirection = "column";
+                        mobileGroupDiv.classList.add("mobileGroup");
+                        categoryDiv.appendChild(mobileGroupDiv);
+                    }
+                    mobileGroupDiv.appendChild(btn);
+                    mobileItemCounter++;
+                } else {
+                    categoryDiv.appendChild(btn); // original behavior for desktop
                 }
-            })
-
-        })
+        
+                btn.addEventListener('click', () => {
+                    console.log("activating", value);
+                    activePrimeCategory = [primeCat, value];
+                    document.querySelectorAll(".readOnlyCheckbox").forEach(e => e.classList.remove("readOnlyCheckbox"));
+                    btn.classList.add("readOnlyCheckbox");
+                    const preExisting = document.getElementById("material_icons_div");
+                    if (preExisting) {
+                        cont.removeChild(preExisting);
+                    }
+                    cont.appendChild(rerenderActivePrimeCat(value));
+                });
+        
+                if (primeCat == activePrimeCategory[0]) {
+                    btn.classList.add("readOnlyCheckbox");
+                }
+            });
+        });
 
         const modelsDiv = document.getElementById("modelsButtonContainerDiv")
         modelsDiv.innerHTML=""
